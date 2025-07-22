@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Object Detection</title>
+    <title>Object Detection App</title>
     <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 Object Detection Tool</h1>
-        <form id="upload-form" enctype="multipart/form-data">
-            <label for="image" class="custom-file-upload">
-                Choose Image
-            </label>
-            <input type="file" id="image" name="image" accept="image/*" required>
-            <button type="submit" id="upload-btn">Detect</button>
-        </form>
+    <div class="app">
+        <h1>🚀 AI Object Detection</h1>
 
-        <div id="loading" class="hidden">Processing... Please wait.</div>
+        <div class="upload-box" id="drop-zone">
+            <p>Drag & drop an image or <label for="image">browse</label></p>
+            <input type="file" id="image" accept="image/*" />
+        </div>
+
+        <button id="upload-btn">Detect Objects</button>
+
+        <div id="loading" class="hidden">🔎 Detecting... Please wait</div>
 
         <div id="result" class="hidden">
             <h2>Result</h2>
-            <img id="output-img" alt="Detection Result">
-            <div id="detections-box">
+            <img id="output-img" alt="Detection Output" />
+            <div class="detection-list">
                 <h3>Detected Objects:</h3>
                 <ul id="detections-list"></ul>
             </div>

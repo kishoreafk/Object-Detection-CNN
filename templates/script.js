@@ -1,52 +1,73 @@
-document.getElementById('upload-form').onsubmit = async function (e) {
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('image');
+const uploadBtn = document.getElementById('upload-btn');
+const loading = document.getElementById('loading');
+const resultBox = document.getElementById('result');
+const outputImg = document.getElementById('output-img');
+const detectionsList = document.getElementById('detections-list');
+
+let selectedFile = null;
+
+// Drag & Drop Events
+dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
+    dropZone.style.backgroundColor = '#e0f2f1';
+});
 
-    const imageInput = document.getElementById('image');
-    const loading = document.getElementById('loading');
-    const resultBox = document.getElementById('result');
-    const detectionsList = document.getElementById('detections-list');
-    const outputImg = document.getElementById('output-img');
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.backgroundColor = '';
+});
 
-    if (!imageInput.files.length) {
-        alert("Please select an image!");
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    selectedFile = e.dataTransfer.files[0];
+    fileInput.files = e.dataTransfer.files;
+});
+
+// File picker fallback
+fileInput.addEventListener('change', () => {
+    selectedFile = fileInput.files[0];
+});
+
+// Upload button
+uploadBtn.onclick = async () => {
+    if (!selectedFile) {
+        alert('Please select or drop an image first.');
         return;
     }
 
     loading.classList.remove('hidden');
     resultBox.classList.add('hidden');
+    detectionsList.innerHTML = '';
 
     const formData = new FormData();
-    formData.append('image', imageInput.files[0]);
+    formData.append('image', selectedFile);
 
     try {
-        const response = await fetch('/detect', {
+        const res = await fetch('/detect', {
             method: 'POST',
             body: formData
         });
 
-        const data = await response.json();
+        const data = await res.json();
+
         if (data.image_url) {
             outputImg.src = '/' + data.image_url;
-            detectionsList.innerHTML = "";
-
-            if (data.detections.length === 0) {
-                detectionsList.innerHTML = "<li>No objects detected.</li>";
-            } else {
-                data.detections.forEach(det => {
-                    const item = document.createElement('li');
-                    item.textContent = `${det.name} (Confidence: ${(det.confidence || det.conf).toFixed(2)})`;
-                    detectionsList.appendChild(item);
-                });
-            }
+            data.detections.forEach(obj => {
+                const li = document.createElement('li');
+                li.textContent = `${obj.name} (Confidence: ${(obj.confidence || obj.conf).toFixed(2)})`;
+                detectionsList.appendChild(li);
+            });
 
             resultBox.classList.remove('hidden');
         } else {
-            alert('Detection failed: ' + (data.error || 'Unknown error'));
+            alert(data.error || 'Error detecting objects.');
         }
-    } catch (err) {
-        alert("Error communicating with server.");
-        console.error(err);
-    }
 
-    loading.classList.add('hidden');
+    } catch (err) {
+        alert('Upload failed. See console.');
+        console.error(err);
+    } finally {
+        loading.classList.add('hidden');
+    }
 };
